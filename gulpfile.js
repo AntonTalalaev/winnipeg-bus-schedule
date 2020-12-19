@@ -8,7 +8,7 @@ const cssnano = require('cssnano');
 const autoprefixer = require('autoprefixer');
 const concat = require('gulp-concat');
 const sourcemaps = require('gulp-sourcemaps');
-const uglify = require('gulp-uglify');
+const minifyInline = require('gulp-minify-inline');
 
 
 
@@ -23,16 +23,19 @@ function htmlTask() {
 function scriptsTask() {
     return src('src/scripts/*.js')
         .pipe(sourcemaps.init())
-        .pipe(uglify())
+        .pipe(minifyInline())
         .pipe(sourcemaps.write())
         .pipe(concat('app.js'))
         .pipe(dest('dist/scripts'));
 }
 
-
 // styles tasks 
 function stylesTask() {
     return src('src/styles/*.css')
+        .pipe(sourcemaps.init())
+        .pipe(postcss([autoprefixer(), cssnano()]))
+        .pipe(sourcemaps.write())
+        .pipe(concat('all.css'))
         .pipe(dest('dist/styles'));
 }
 
