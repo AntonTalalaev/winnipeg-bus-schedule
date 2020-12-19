@@ -1,17 +1,11 @@
 const { src, dest, series, parallel } = require('gulp');
 
-
-
-
 const postcss = require('gulp-postcss');
 const cssnano = require('cssnano');
 const autoprefixer = require('autoprefixer');
 const concat = require('gulp-concat');
 const sourcemaps = require('gulp-sourcemaps');
 const minifyInline = require('gulp-minify-inline');
-
-
-
 
 // HTML tasks
 function htmlTask() {
@@ -31,15 +25,16 @@ function scriptsTask() {
 
 // styles tasks 
 function stylesTask() {
-    return src('src/styles/*.css')
+    return src([
+        'src/styles/normalize.css',
+        'src/styles/style.css'
+    ])
         .pipe(sourcemaps.init())
         .pipe(postcss([autoprefixer(), cssnano()]))
         .pipe(sourcemaps.write())
         .pipe(concat('all.css'))
         .pipe(dest('dist/styles'));
 }
-
-
 
 // to make tasks available in gulp command 
 exports.html = htmlTask;
