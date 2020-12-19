@@ -1,9 +1,9 @@
 APIKey = 'J9BnB98MwTTTmVYDGXke';
-urlBase = 'https://api.winnipegtransit.com/v3/'
+urlBase = 'https://api.winnipegtransit.com/v3/';
 urlStreets = `${urlBase}streets.json?api-key=${APIKey}&usage=long&name=`;
-urlStops = `${urlBase}stops.json?api-key=${APIKey}&usage=long&street=`
-urlStopSchedulePart1 = `${urlBase}stops/`
-urlStopSchedulePart2 = `/schedule.json?api-key=${APIKey}&start=2020-12-17T08:00:00&end=2020-12-17T23:00:00&usage=long` // remove start and end !!!
+urlStops = `${urlBase}stops.json?api-key=${APIKey}&usage=long&street=`;
+urlStopSchedulePart1 = `${urlBase}stops/`;
+urlStopSchedulePart2 = `/schedule.json?api-key=${APIKey}&usage=long`;
 
 const inputElement = document.querySelector('aside input');
 const streetsElement = document.querySelector('.streets');
@@ -12,7 +12,10 @@ const tbodyElement = document.querySelector('tbody');
 
 const numOfNextBusesToShow = 2;
 
-
+/**
+ * Method to make API calls and return JSON
+ * @param {string} url - URL string for API call
+ */
 function fetchJSON(url) {
     return fetch(url)
         .then(resp => {
@@ -25,9 +28,11 @@ function fetchJSON(url) {
         .catch(err => {
             console.log(err);
         });
-}
+};
 
-
+/**
+ * Method that displays for User a message that no Stops found on the street
+ */
 const displayNoStopsFoundMessage = function () {
     tbodyElement.insertAdjacentHTML('beforeend',
         `<tr>
@@ -38,22 +43,32 @@ const displayNoStopsFoundMessage = function () {
             <td></td>
         </tr>`
     );
-}
+};
 
+/**
+ * Method that displays for User a message that no Streets found
+ */
 const displayNoStreetsFoundMessage = function () {
     streetsElement.insertAdjacentHTML('beforeend',
         `<p>Sorry, no results were found.</p>`
     );
-}
+};
 
+/**
+ * Method to display street search results
+ * @param {Array} streets - list of streets
+ */
 const createStreetsList = function (streets) {
     for (const street of streets) {
         streetsElement.insertAdjacentHTML('beforeend',
             `<a href="#" data-street-key="${street.key}">${street.name}</a>`
         );
     }
-}
+};
 
+/**
+ * EventListener for street search input
+ */
 inputElement.addEventListener('keyup', function (event) {
     if (event.keyCode === 13) {
         streetsElement.innerHTML = '';
@@ -71,11 +86,35 @@ inputElement.addEventListener('keyup', function (event) {
     }
 });
 
+/**
+ * Method creates table row HTML (next bus) and returns it
+ * @param {Object} stop 
+ * @param {Object} route 
+ * @param {Object} scheduledStop 
+ */
+const createRowHTML = function (stop, route, scheduledStop) {
+    return `<tr>
+                <td>${stop.street.name}</td>
+                <td>${stop["cross-street"].name}</td>
+                <td>${stop.direction}</td>
+                <td>${route.route.key}</td> 
+                <td>${getTimeShort(scheduledStop.times.arrival.scheduled)}</td>
+            </tr> `;
+};
 
+/**
+ * Method to show current street name (that choose user) at the page title
+ * @param {string} streetName - name of the street 
+ */
 const setTitleStreetName = function (streetName) {
     titleStreetNameElement.textContent = `Displaying results for ${streetName}`;
-}
+};
 
+/**
+ * Method to convert full date string into short format: 
+ * Example: 11:05 PM
+ * @param {string} dateStr - full date format
+ */
 const getTimeShort = function (dateStr) {
     const dateObject = new Date(dateStr);
     let hours = dateObject.getHours();
@@ -86,59 +125,57 @@ const getTimeShort = function (dateStr) {
     minutes = minutes < 10 ? '0' + minutes : minutes;
     const strTime = hours + ':' + minutes + ' ' + ampm;
     return strTime;
-}
+};
 
-const displayStopsTable = function (stops) {
-    stops.forEach(stop => {
-        let tableHTML = '';
-        fetchJSON(urlStopSchedulePart1 + stop.key + urlStopSchedulePart2)
-            .then(json => {
-                if (json['stop-schedule']['route-schedules'].length === 0) {
-                    throw Error(`Didn't found scheduled buses for stop ${json.stop.name}`);
-                }
-                console.log(json);
-
-                json['stop-schedule']['route-schedules'].forEach(route => {
-                    for (let i = 0; i < route['scheduled-stops'].length; i++) {
-                        if (i >= numOfNextBusesToShow) {
-                            break;
+/**
+ * Method to display all found stops and next busses for the choosen street
+ * @param {string} streetKey - ID of the street
+ * @param {string} streetName - name of the street
+ */
+const displayStopsTable = function (streetKey, streetName) {
+    fetchJSON(urlStops + streetKey)
+        .then(json => {
+            tbodyElement.innerHTML = '';
+            if (json.stops.length === 0) {
+                displayNoStopsFoundMessage();
+                throw Error(`No stops found on the street ${streetName}`);
+            }
+            return json.stops;
+        })
+        .then(stops => {    
+            stops.forEach(stop => {
+                let tableHTML = '';
+                fetchJSON(urlStopSchedulePart1 + stop.key + urlStopSchedulePart2)
+                    .then(json => {
+                        if (json['stop-schedule']['route-schedules'].length === 0) {
+                            throw Error(`Didn't found scheduled buses for the stop`);
                         }
-                        tableHTML += `<tr>
-                    <td>${stop.street.name}</td>
-                    <td>${stop["cross-street"].name}</td>
-                    <td>${stop.direction}</td>
-                    <td>${route.route.key}</td> 
-                    <td>${getTimeShort(route['scheduled-stops'][i].times.arrival.scheduled)}</td>
-                    </tr> `;
-                    }
-                });
-                tbodyElement.insertAdjacentHTML('afterbegin', tableHTML);
-            })
-            .catch(err => {
-                // need to display error to user
-                console.log(err);
+                        json['stop-schedule']['route-schedules'].forEach(route => {
+                            for (let i = 0; i < route['scheduled-stops'].length; i++) {
+                                if (i >= numOfNextBusesToShow) {
+                                    break;
+                                }
+                                tableHTML += createRowHTML(stop, route, route['scheduled-stops'][i]);
+                            }
+                        });
+                        tbodyElement.insertAdjacentHTML('afterbegin', tableHTML);
+                    })
+                    .catch(err => {
+                        console.log(err);
+                    });
             });
-    });
-}
+        })
+        .catch(err => {
+            console.log(err);
+        });
+};
 
-
+/**
+ * EventListener of the street elements
+ */
 streetsElement.addEventListener('click', function (event) {
     if (event.target.tagName.toLowerCase() === 'a') {
         setTitleStreetName(event.target.textContent);
-        fetchJSON(urlStops + event.target.dataset.streetKey)
-            .then(json => {
-                tbodyElement.innerHTML = '';
-                if (json.stops.length === 0) {
-                    displayNoStopsFoundMessage();
-                    throw Error(`No stops found on the street ${event.target.textContent}`);
-                }
-                displayStopsTable(json.stops);
-            })
-            .catch(err => {
-                // need to display error to user
-                console.log(err);
-            });
+        displayStopsTable(event.target.dataset.streetKey, event.target.textContent);
     }
 });
-
-
