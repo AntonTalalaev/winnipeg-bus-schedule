@@ -28,6 +28,12 @@ function fetchJSON(url) {
 }
 
 
+const displayNoStreetsFoundMessage = function () {
+    streetsElement.insertAdjacentHTML('beforeend',
+    `<p>Sorry, no results were found.</p>`
+    );
+}
+
 const createStreetsList = function (streets) {
     for (const street of streets) {
         streetsElement.insertAdjacentHTML('beforeend',
@@ -41,7 +47,11 @@ inputElement.addEventListener('keyup', function (event) {
         streetsElement.innerHTML = '';
         fetchJSON(urlStreets + inputElement.value)
             .then(json => {
-                createStreetsList(json.streets);
+                if (json.streets.length === 0) {
+                    displayNoStreetsFoundMessage();
+                } else {
+                    createStreetsList(json.streets);
+                }
             })
             .catch(err => {
                 console.log(err);
@@ -55,36 +65,36 @@ const setTitleStreetName = function (streetName) {
 }
 
 
-const displayStopsTable = function (stops) {    
+const displayStopsTable = function (stops) {
     stops.forEach(stop => {
         let tableHTML = '';
         fetchJSON(urlStopSchedulePart1 + stop.key + urlStopSchedulePart2)
-        .then(json => {
-            if (json['stop-schedule']['route-schedules'].length === 0) {
-                throw Error(`Didn't found scheduled buses for stop ${json.stop.name}`);
-            }
-            console.log(json);
-            
-            json['stop-schedule']['route-schedules'].forEach(route => {            
-                for (let i = 0; i < route['scheduled-stops'].length; i++) {
-                    if (i >= numOfNextBusesToShow){
-                        break;
-                    }
-                    tableHTML += `<tr>
+            .then(json => {
+                if (json['stop-schedule']['route-schedules'].length === 0) {
+                    throw Error(`Didn't found scheduled buses for stop ${json.stop.name}`);
+                }
+                console.log(json);
+
+                json['stop-schedule']['route-schedules'].forEach(route => {
+                    for (let i = 0; i < route['scheduled-stops'].length; i++) {
+                        if (i >= numOfNextBusesToShow) {
+                            break;
+                        }
+                        tableHTML += `<tr>
                     <td>${stop.street.name}</td>
                     <td>${stop["cross-street"].name}</td>
                     <td>${stop.direction}</td>
                     <td>${route.route.key}</td> 
                     <td>${route['scheduled-stops'][i].times.arrival.scheduled}</td>
                     </tr> `;
-                }
+                    }
+                });
+                tbodyElement.insertAdjacentHTML('afterbegin', tableHTML);
+            })
+            .catch(err => {
+                // need to display error to user
+                console.log(err);
             });
-            tbodyElement.insertAdjacentHTML('afterbegin', tableHTML);
-        })
-        .catch(err => {
-            // need to display error to user
-            console.log(err);
-        });
     });
 }
 
@@ -99,7 +109,7 @@ streetsElement.addEventListener('click', function (event) {
                     throw Error(`No stops found on the street ${event.target.textContent}`);
                 }
                 displayStopsTable(json.stops);
-            })            
+            })
             .catch(err => {
                 // need to display error to user
                 console.log(err);
