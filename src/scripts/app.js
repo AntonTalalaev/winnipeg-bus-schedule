@@ -30,7 +30,7 @@ function fetchJSON(url) {
 
 const displayNoStreetsFoundMessage = function () {
     streetsElement.insertAdjacentHTML('beforeend',
-    `<p>Sorry, no results were found.</p>`
+        `<p>Sorry, no results were found.</p>`
     );
 }
 
@@ -64,6 +64,17 @@ const setTitleStreetName = function (streetName) {
     titleStreetNameElement.textContent = `Displaying results for ${streetName}`;
 }
 
+const getTimeShort = function(dateStr) {
+    const dateObject = new Date(dateStr);
+    let hours = dateObject.getHours();
+    let minutes = dateObject.getMinutes();
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    minutes = minutes < 10 ? '0' + minutes : minutes;
+    const strTime = hours + ':' + minutes + ' ' + ampm;
+    return strTime;
+}
 
 const displayStopsTable = function (stops) {
     stops.forEach(stop => {
@@ -85,7 +96,7 @@ const displayStopsTable = function (stops) {
                     <td>${stop["cross-street"].name}</td>
                     <td>${stop.direction}</td>
                     <td>${route.route.key}</td> 
-                    <td>${route['scheduled-stops'][i].times.arrival.scheduled}</td>
+                    <td>${getTimeShort(route['scheduled-stops'][i].times.arrival.scheduled)}</td>
                     </tr> `;
                     }
                 });
