@@ -1,7 +1,7 @@
 APIKey = 'J9BnB98MwTTTmVYDGXke';
 urlBase = 'https://api.winnipegtransit.com/v3/'
 urlStreets = `${urlBase}streets.json?api-key=${APIKey}&usage=long&name=`;
-urlStops = `${urlBase}stops.json?api-key=${APIKey}&street=`
+urlStops = `${urlBase}stops.json?api-key=${APIKey}&usage=long&street=`
 urlStopSchedulePart1 = `${urlBase}stops/`
 urlStopSchedulePart2 = `/schedule.json?api-key=${APIKey}&start=2020-12-17T08:00:00&end=2020-12-17T23:00:00&usage=long` // remove start and end !!!
 
