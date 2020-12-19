@@ -28,6 +28,18 @@ function fetchJSON(url) {
 }
 
 
+const displayNoStopsFoundMessage = function () {
+    tbodyElement.insertAdjacentHTML('beforeend',
+        `<tr>
+            <td>Sorry, no stops were found on the street.</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>`
+    );
+}
+
 const displayNoStreetsFoundMessage = function () {
     streetsElement.insertAdjacentHTML('beforeend',
         `<p>Sorry, no results were found.</p>`
@@ -64,7 +76,7 @@ const setTitleStreetName = function (streetName) {
     titleStreetNameElement.textContent = `Displaying results for ${streetName}`;
 }
 
-const getTimeShort = function(dateStr) {
+const getTimeShort = function (dateStr) {
     const dateObject = new Date(dateStr);
     let hours = dateObject.getHours();
     let minutes = dateObject.getMinutes();
@@ -117,6 +129,7 @@ streetsElement.addEventListener('click', function (event) {
             .then(json => {
                 tbodyElement.innerHTML = '';
                 if (json.stops.length === 0) {
+                    displayNoStopsFoundMessage();
                     throw Error(`No stops found on the street ${event.target.textContent}`);
                 }
                 displayStopsTable(json.stops);
@@ -129,15 +142,3 @@ streetsElement.addEventListener('click', function (event) {
 });
 
 
-function createAndInsertInnerHTML(movie) {
-    movieListElement.insertAdjacentHTML('afterbegin',
-        `<div class='movie'>
-            <img class="movie-option" src="${movie.Poster}">
-            <div class="movie-info">
-                <div>${movie.Title}</div>
-                <div>${movie.imdbRating}</div>
-                <div>${movie.Plot}</div>
-            </div>
-        </div>`
-    );
-}
