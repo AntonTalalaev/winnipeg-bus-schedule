@@ -1,6 +1,18 @@
 const { src, dest, series, parallel } = require('gulp');
 
 
+
+
+const postcss = require('gulp-postcss');
+const cssnano = require('cssnano');
+const autoprefixer = require('autoprefixer');
+const concat = require('gulp-concat');
+const sourcemaps = require('gulp-sourcemaps');
+const uglify = require('gulp-uglify');
+
+
+
+
 // HTML tasks
 function htmlTask() {
     return src('src/*.html')
@@ -10,8 +22,13 @@ function htmlTask() {
 // scripts tasks 
 function scriptsTask() {
     return src('src/scripts/*.js')
+        .pipe(sourcemaps.init())
+        .pipe(uglify())
+        .pipe(sourcemaps.write())
+        .pipe(concat('app.js'))
         .pipe(dest('dist/scripts'));
 }
+
 
 // styles tasks 
 function stylesTask() {
