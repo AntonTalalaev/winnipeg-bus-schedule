@@ -1,0 +1,22 @@
+{
+  "name": "winnipeg-transit",
+  "version": "1.0.0",
+  "description": "For this assignment, you will be building a bus schedule search by making use of the [Winnipeg Transit Data API](https://api.winnipegtransit.com/). Sign-up for free access [here](https://api.winnipegtransit.com/).",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AntonTalalaev/winnipeg-transit.git"
+  },
+  "author": "Anton Talalaev",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AntonTalalaev/winnipeg-transit/issues"
+  },
+  "homepage": "https://github.com/AntonTalalaev/winnipeg-transit#readme",
+  "devDependencies": {
+    "gulp": "^4.0.2"
+  }
+}
