@@ -1,4 +1,4 @@
-# Winnipeg-transit app
+# Winnipeg-bus-schedule app
 
 The bus schedule search project, built with use of the [Winnipeg Transit Data API](https://api.winnipegtransit.com/). 
 
